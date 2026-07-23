@@ -1,0 +1,84 @@
+{
+  "paper_title": "Interpretable Hypothesis-Driven Trading:A Rigorous Walk-Forward Validation Framework for Market Microstructure Signals",
+  "paper_url": "https://arxiv.org/pdf/2512.12924v1",
+  "societal_problem": "The lack of transparency, reproducibility, and rigorous validation in algorithmic trading systems leads to overfitting, lookahead bias, and potentially harmful financial practices that undermine trust in financial markets.",
+  "solution_architecture": "The solution involves designing a robust, interpretable, and reproducible algorithmic trading system validation platform. The architecture will include a backend for data processing and signal generation, a reinforcement learning engine for trading strategy optimization, a walk-forward validation module, and a frontend for interpretability and reporting. The tech stack will feature Python (for ML, data processing, and validation), TensorFlow or PyTorch (for reinforcement learning), FastAPI (for backend APIs), React (for frontend), PostgreSQL (for data storage), and Docker (for containerization).",
+  "status": "in_progress",
+  "tasks": [
+    {
+      "id": 1,
+      "description": "Set up the project repository with basic configurations, including folder structure, README, and Dockerfile for containerization.",
+      "status": "pending"
+    },
+    {
+      "id": 2,
+      "description": "Implement a data ingestion pipeline to fetch and preprocess daily OHLCV data for 100 US equities from 2015 to 2024.",
+      "status": "pending"
+    },
+    {
+      "id": 3,
+      "description": "Develop a module for hypothesis-driven signal generation based on market microstructure patterns.",
+      "status": "pending"
+    },
+    {
+      "id": 4,
+      "description": "Integrate a reinforcement learning engine to optimize trading strategies based on generated signals.",
+      "status": "pending"
+    },
+    {
+      "id": 5,
+      "description": "Implement a walk-forward validation framework with rolling window validation across 34 independent test periods.",
+      "status": "pending"
+    },
+    {
+      "id": 6,
+      "description": "Incorporate realistic transaction cost modeling and position constraints into the trading strategy evaluation.",
+      "status": "pending"
+    },
+    {
+      "id": 7,
+      "description": "Design a backend API using FastAPI to handle requests for signal generation, validation results, and reporting.",
+      "status": "pending"
+    },
+    {
+      "id": 8,
+      "description": "Develop a frontend interface using React to visualize hypothesis explanations, validation results, and trading performance metrics.",
+      "status": "pending"
+    },
+    {
+      "id": 9,
+      "description": "Implement a module to enforce strict information set discipline and prevent lookahead bias during validation.",
+      "status": "pending"
+    },
+    {
+      "id": 10,
+      "description": "Develop a reporting module to generate interpretable natural language explanations for trading signals and validation results.",
+      "status": "pending"
+    },
+    {
+      "id": 11,
+      "description": "Implement performance evaluation metrics, including Sharpe ratio, maximum drawdown, beta, and regime-dependent returns.",
+      "status": "pending"
+    },
+    {
+      "id": 12,
+      "description": "Set up a PostgreSQL database schema to store raw data, processed signals, validation results, and performance metrics.",
+      "status": "pending"
+    },
+    {
+      "id": 13,
+      "description": "Write unit tests for the data pipeline, signal generation module, and walk-forward validation framework.",
+      "status": "pending"
+    },
+    {
+      "id": 14,
+      "description": "Containerize the entire application using Docker to ensure reproducibility and ease of deployment.",
+      "status": "pending"
+    },
+    {
+      "id": 15,
+      "description": "Deploy the application on a cloud platform (e.g., AWS, GCP, or Azure) with CI/CD pipelines for continuous integration and deployment.",
+      "status": "pending"
+    }
+  ]
+}
