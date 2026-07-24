@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from .config import settings
+from .routers import data_ingestion
 
 # Hypothesis lifecycle management
 @asynccontextmanager
@@ -17,17 +18,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Hypothesis-Driven Trading Validator",
-    lifespan=lifespan,
-    docs_url="/quant/docs",
-    redoc_url=None
+    description="Robust framework for financial strategy validation",
+    lifespan=lifespan
 )
 
-@app.get("/health")
+app.include_router(data_ingestion.router)
+
+@app.get("/")
 async def health_check():
-    return {
-        "status": "operational",
-        "validation_constraints": {
-            "max_hypothesis_complexity": settings.MAX_HYPOTHESIS_COMPLEXITY,
-            "required_walkforward_windows": settings.WALKFORWARD_WINDOW
-        }
-    }
+    return {"status": "operational", "validation_system": "active"}
