@@ -13,7 +13,7 @@
     {
       "id": 2,
       "description": "Implement a data ingestion pipeline to fetch and preprocess daily OHLCV data for 100 US equities from 2015 to 2024.",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": 3,
