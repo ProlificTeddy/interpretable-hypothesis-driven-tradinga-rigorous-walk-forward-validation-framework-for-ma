@@ -1,41 +1,46 @@
 import pandas as pd
 import numpy as np
 from typing import Dict
+from ..schemas.transaction import TransactionCost, PositionConstraints
 
 class BacktestingService:
-    def run_backtest(self, data: pd.DataFrame, signals: pd.DataFrame) -> Dict[str, float]:
+    def run_backtest(self, data: pd.DataFrame, signals: pd.DataFrame, 
+                   transaction_cost: TransactionCost, position_constraints: PositionConstraints) -> Dict[str, float]:
         merged = pd.merge(data, signals, on=['timestamp', 'symbol'], suffixes=('', '_signal'))
-        merged['position'] = merged['signal'].astype(int).diff().fillna(0)
         
-        # Calculate returns
-        merged['strategy_returns'] = merged['position'].shift(1) * merged['close'].pct_change()
+        # Position calculation with constraints
+        merged['position'] = merged['signal'].astype(int)
+        
+        if not position_constraints.allow_short:
+            merged['position'] = merged['position'].clip(lower=0)
+        merged['position'] = merged['position'].clip(upper=position_constraints.max_position_size)
+        
+        # Calculate position changes and transaction costs
+        merged['trade'] = merged['position'].diff().fillna(0)
+        merged['fixed_fee'] = (merged['trade'] != 0).astype(int) * transaction_cost.fee_per_trade
+        merged['variable_fee'] = abs(merged['trade']) * transaction_cost.fee_per_share
+        merged['slippage'] = abs(merged['trade']) * merged['close'] * transaction_cost.slippage_percent
+        total_costs = merged['fixed_fee'] + merged['variable_fee'] + merged['slippage']
+        
+        # Calculate returns with cost adjustment
+        merged['strategy_returns'] = (
+            merged['position'].shift(1) * merged['close'].pct_change()
+        ) - (total_costs / merged['close'].shift(1)).fillna(0)
+        
+        # Leverage constraint enforcement
+        merged['exposure'] = merged['position'] * merged['close']
+        merged['exposure'] = merged['exposure'].clip(upper=position_constraints.max_leverage * merged['exposure'].mean())
+        
         merged['cumulative_returns'] = (1 + merged['strategy_returns']).cumprod()
         
         # Risk metrics
-        sharpe = self._annualized_sharpe(merged['strategy_returns'])
-        max_dd = self._max_drawdown(merged['cumulative_returns'])
-        sortino = self._sortino_ratio(merged['strategy_returns'])
+        max_drawdown = (merged['cumulative_returns'].cummax() - merged['cumulative_returns']).max()
+        sharpe_ratio = merged['strategy_returns'].mean() / merged['strategy_returns'].std() * np.sqrt(252)
         
         return {
-            'sharpe_ratio': sharpe,
-            'max_drawdown': max_dd,
-            'sortino_ratio': sortino,
-            'total_return': merged['cumulative_returns'].iloc[-1] - 1,
-            'win_rate': (merged['strategy_returns'] > 0).mean()
+            "total_return": merged['cumulative_returns'].iloc[-1] - 1,
+            "max_drawdown": max_drawdown,
+            "sharpe_ratio": sharpe_ratio,
+            "turnover": merged['trade'].abs().sum(),
+            "total_costs": total_costs.sum()
         }
-    
-    def _annualized_sharpe(self, returns: pd.Series) -> float:
-        if len(returns) < 2 or returns.std() == 0:
-            return 0.0
-        return (returns.mean() * 252) / (returns.std() * np.sqrt(252))
-    
-    def _max_drawdown(self, cumulative: pd.Series) -> float:
-        peak = cumulative.expanding(min_periods=1).max()
-        trough = cumulative.expanding(min_periods=1).min()
-        return (trough / peak - 1).min()
-    
-    def _sortino_ratio(self, returns: pd.Series) -> float:
-        downside = returns[returns < 0]
-        if len(downside) < 2 or downside.std() == 0:
-            return 0.0
-        return (returns.mean() * 252) / (downside.std() * np.sqrt(252))
