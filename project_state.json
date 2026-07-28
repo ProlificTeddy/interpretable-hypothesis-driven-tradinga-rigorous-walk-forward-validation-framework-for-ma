@@ -33,7 +33,7 @@
     {
       "id": 6,
       "description": "Incorporate realistic transaction cost modeling and position constraints into the trading strategy evaluation.",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": 7,
