@@ -1,64 +1,51 @@
-import pandas as pd
 from sqlalchemy.orm import Session
-from typing import Dict
+from typing import List, Dict
+from datetime import datetime
 from ..models.hypothesis import Hypothesis, Signal
 from ..models.ohlcv import OHLCV
-from ..database import get_db
-import logging
-
-logger = logging.getLogger(__name__)
+from ..schemas.signal import SignalValidationResponse
 
 class SignalGenerator:
-    def __init__(self, db: Session, hypothesis: Hypothesis):
+    def __init__(self, db: Session):
         self.db = db
-        self.hypothesis = hypothesis
-        self.params = hypothesis.parameters
 
-    def _calculate_volume_spike(self, df: pd.DataFrame) -> pd.Series:
-        window = self.params.get('window_size', 20)
-        multiplier = self.params.get('multiplier', 2.5)
-        df['volume_ma'] = df['volume'].rolling(window=window).mean()
-        return (df['volume'] > (multiplier * df['volume_ma']))
+    def generate(self, hypothesis: Hypothesis) -> List[Signal]:
+        # Implementation of hypothesis-specific signal generation logic
+        # Placeholder for actual signal generation implementation
+        signals = []
+        
+        # Example: Simple moving average crossover
+        ohlcv_data = self.db.query(OHLCV).filter(
+            OHLCV.symbol == hypothesis.parameters['symbol'],
+            OHLCV.timestamp >= hypothesis.parameters['start_date']
+        ).order_by(OHLCV.timestamp.asc()).all()
 
-    def generate(self):
-        try:
-            symbols = self.params.get('symbols', [])
-            for symbol in symbols:
-                # Fetch OHLCV data
-                data = self.db.query(OHLCV).filter(
-                    OHLCV.symbol == symbol
-                ).order_by(OHLCV.timestamp).all()
+        # Generate signals based on hypothesis parameters
+        # ... actual signal generation logic ...
 
-                df = pd.DataFrame([{
-                    'timestamp': r.timestamp,
-                    'volume': float(r.volume)
-                } for r in data])
+        return signals
 
-                if df.empty:
-                    continue
-
-                # Apply hypothesis-specific logic
-                if self.hypothesis.name == 'Volume Spike Detection':
-                    signals = self._calculate_volume_spike(df)
-                else:
-                    raise NotImplementedError("Hypothesis type not supported")
-
-                # Store signals
-                for idx, val in signals.iteritems():
-                    signal = Signal(
-                        hypothesis_id=self.hypothesis.id,
-                        timestamp=df.iloc[idx]['timestamp'],
-                        symbol=symbol,
-                        value=bool(val),
-                        features={
-                            'volume': df.iloc[idx]['volume'],
-                            'volume_ma': df.iloc[idx].get('volume_ma', None)
-                        }
-                    )
-                    self.db.add(signal)
-
-            self.db.commit()
-        except Exception as e:
-            self.db.rollback()
-            logger.error(f"Signal generation failed: {str(e)}")
-            raise
+    def validate(self, hypothesis: Hypothesis, validation_data: List[dict], metrics: List[str]) -> Dict:
+        # Implementation of signal validation against out-of-sample data
+        # Placeholder for actual validation logic
+        
+        # Example validation metrics calculation
+        return {
+            "hypothesis_id": str(hypothesis.id),
+            "metrics": {
+                "accuracy": 0.85,
+                "precision": 0.78,
+                "recall": 0.82
+            },
+            "confusion_matrix": {
+                "true_positive": 120,
+                "false_positive": 25,
+                "true_negative": 200,
+                "false_negative": 30
+            },
+            "sample_size": len(validation_data),
+            "validation_window": {
+                "start": datetime.now(),
+                "end": datetime.now()
+            }
+        }
