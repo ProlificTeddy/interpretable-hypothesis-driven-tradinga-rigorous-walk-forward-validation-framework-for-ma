@@ -38,7 +38,7 @@
     {
       "id": 7,
       "description": "Design a backend API using FastAPI to handle requests for signal generation, validation results, and reporting.",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": 8,
